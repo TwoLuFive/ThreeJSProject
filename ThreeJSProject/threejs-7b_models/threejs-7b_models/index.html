@@ -1,0 +1,113 @@
+<html>
+
+<head>
+    <title>threejs - models</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="myCanvas"></canvas>
+
+    <script src="three.js"></script>
+    <script src="GLTFLoader.js"></script>
+    <script src="PointerLockControls.js"></script>
+    <script>
+
+        var renderer,
+            scene,
+            camera,
+            myCanvas = document.getElementById('myCanvas');
+
+        //RENDERER
+        renderer = new THREE.WebGLRenderer({
+            canvas: myCanvas,
+            antialias: true
+        });
+        renderer.setClearColor(0x000000);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        //CAMERA
+        camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 10;
+        camera.position.y = 10;
+        camera.rotation.x = -0.4;
+        //SCENE
+        scene = new THREE.Scene();
+
+        var controls = new THREE.PointerLockControls(camera);
+        myCanvas.addEventListener('click', function () {
+            controls.lock();
+        });
+
+        var mesh;
+        function setupMap(scene) {
+            let loader = new THREE.GLTFLoader();
+            loader.load('Ground.glb', function (gltf) {
+                mesh = gltf.scene;
+                mesh.children[0].material = new THREE.MeshPhysicalMaterial();
+                scene.add(mesh);
+                mesh.position.z = -12;
+                mesh.position.x = -2;
+            });
+            loader.load('EmergencyBackupGenerator.glb', function (gltf) {
+                mesh = gltf.scene;
+                scene.add(mesh);
+                mesh.position.z = -10;
+            });
+            loader.load('Chair1.glb', function (gltf) {
+                mesh = gltf.scene;
+                scene.add(mesh);
+                mesh.children[0].material = new THREE.MeshPhysicalMaterial();
+                mesh.position.x = -3;
+                mesh.position.z = -10;
+            });
+            loader.load('table.glb', function (gltf) {
+                mesh = gltf.scene;
+                scene.add(mesh);
+                mesh.children[0].material = new THREE.MeshPhysicalMaterial();
+                mesh.position.x = -5;
+                mesh.position.z = -10;
+            });
+            loader.load('SciFiMachine.glb', function (gltf) {
+                mesh = gltf.scene;
+                scene.add(mesh);
+                mesh.children[0].material = new THREE.MeshPhysicalMaterial();
+                mesh.position.set(0, 0, 0);
+            });
+        }
+        function setupLights(scene) {
+            var light = new THREE.PointLight(0xffffff, 2);
+            light.position.set(0, 10, 0);
+            scene.add(light);
+
+            var light2 = new THREE.PointLight(0xffffff, 1);
+            light2.position.set(-4, 10, -20);
+            scene.add(light2);
+        }
+        //RENDER LOOP
+        setupMap(scene);
+        setupLights(scene);
+        render();
+
+        var delta = 0;
+        var prevTime = Date.now();
+
+        function render() {
+
+            renderer.render(scene, camera);
+
+            requestAnimationFrame(render);
+        }
+
+    </script>
+</body>
+
+</html>
