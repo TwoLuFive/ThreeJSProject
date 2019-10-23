@@ -47,21 +47,28 @@
 
         var mesh;
         function setupMap(scene) {
+            
             let loader = new THREE.TextureLoader();
-            let geometry = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
+            let geometry = new THREE.PlaneBufferGeometry( 250, 250);
             geometry.rotateX( - Math.PI / 2 );
             let material = new THREE.MeshLambertMaterial({ map: loader.load('ground.png'), side: THREE.DoubleSide });
             let ground = new THREE.Mesh(geometry, material);
 
             ground.position.set(0, 0, 0);
             scene.add(ground);
-            /*
-            let loader = new THREE.GLTFLoader();
+            
+            let wall = setupWall(scene);
+            wall.position.set(6, wall.position.y, 0);
+            wall = setupWall(scene);
+            wall.position.set(-6, wall.position.y, 0);
+
+            loader = new THREE.GLTFLoader();
             loader.load('EmergencyBackupGenerator.glb', function (gltf) {
                 mesh = gltf.scene;
                 scene.add(mesh);
                 mesh.position.z = -10;
             });
+            /*
             loader.load('Chair1.glb', function (gltf) {
                 mesh = gltf.scene;
                 scene.add(mesh);
@@ -83,14 +90,25 @@
                 mesh.position.set(0, 0, 0);
             }); */
         }
+        function setupWall(scene, position)
+        {
+            let loader = new THREE.TextureLoader();
+            let geometry = new THREE.BoxGeometry( 2, 20, 100 );
+            geometry.position = position;
+            let material = new THREE.MeshLambertMaterial({ map: loader.load('wall.png'), side: THREE.DoubleSide });
+            let wall = new THREE.Mesh(geometry, material);
+
+            //Ensures that the entire wall is on the ground.
+            wall.position.y += wall.geometry.parameters.height / 2;
+            scene.add(wall);
+
+            return wall;
+        }
         function setupLights(scene) {
             var light = new THREE.PointLight(0xffffff, 2);
             light.position.set(0, 20, 0);
             scene.add(light);
 
-            var light2 = new THREE.PointLight(0xffffff, 1);
-            light2.position.set(-4, 10, -20);
-            scene.add(light2);
         }
         //RENDER LOOP
         setupMap(scene);
@@ -103,7 +121,6 @@
         function render() {
 
             renderer.render(scene, camera);
-
             requestAnimationFrame(render);
         }
 
