@@ -2,10 +2,10 @@ var scene = new THREE.Scene();
 scene.background = new THREE.Color(0x111111);
 
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0,2,3);
+camera.position.set(0,40,100);
 
-var mixer;
 var clock = new THREE.Clock();
+var mixer;
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -20,25 +20,26 @@ window.addEventListener('resize', function () {
 var start = function () {
     
     var light = new THREE.PointLight(0xffffff, 5);
-    light.position.set(0, 3, 5);
+    light.position.set(0, 90, 200);
     scene.add(light);
 
     var light = new THREE.PointLight(0xffffff, 5);
-    light.position.set(2, 10, 0);
+    light.position.set(100, 300, 0);
     scene.add(light);
 
 
     var loader = new THREE.FBXLoader();
-    loader.load( './zombie2.fbx', function ( object ) {
+    loader.load( './test.fbx', function ( object ) {
         object.position.set(0,0,0);
         mixer = new THREE.AnimationMixer( object );
-        var action = mixer.clipAction( object.animations[ 0 ] );
-        action.play();
         object.traverse( function ( child ) {
             if ( child.isMesh ) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }
+        } );
+        object.animations.forEach( function ( clip ) {
+            mixer.clipAction( clip ).play();
         } );
         scene.add( object );
     
