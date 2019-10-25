@@ -12,6 +12,8 @@
 
     <script src="js/three.js"></script>
     <script src="js/GLTFLoader.js"></script>
+    <script src="js/FBXLoader.js"></script>
+    <script src="js/inflate.min.js"></script>
     <script src="js/PointerLockControls.js"></script>
     <script src="js/OrbitControls.js"></script>
 </head>
@@ -20,13 +22,13 @@
 
     <canvas id="myCanvas"></canvas>
 
-
     <script>
         var renderer,
         bulbLight,
             clock,
             scene,
             camera,
+            mixer,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
         function init() {
@@ -37,7 +39,7 @@
                 canvas: myCanvas,
                 antialias: true
             });
-            renderer.setClearColor(0x000000);
+            renderer.setClearColor(0x00000);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
@@ -76,19 +78,42 @@
                 mesh.position.set(1.5, 0, 1.5);
             });
         }
+
+        function loadZombie(scene){
+            var loader = new THREE.FBXLoader();
+            loader.load( './test.fbx', function ( object ) {
+                object.position.set(0,0,-4);
+                object.scale.set(0.03,0.03,0.03);
+                
+                mixer = new THREE.AnimationMixer( object );
+
+                object.traverse( function ( child ) {
+                    if ( child.isMesh ) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                } );
+                mixer.clipAction( object.animations[2] ).play();
+                scene.add( object );
+                
+            
+            }, undefined, function ( e ) {
+                console.error( e );
+            } );
+        }
         function setupLights(scene) {
             var bulbGeometry = new THREE.SphereBufferGeometry( 0.02, 16, 8 );
-				bulbLight = new THREE.PointLight( 0xcc3333, 1, 100, 35);
+            bulbLight = new THREE.PointLight( 0xcc3333, 1, 100, 35);
 
-				bulbMat = new THREE.MeshStandardMaterial( {
-					emissive: 0xcc3333,
-					emissiveIntensity: 1,
-					color: 0x000000
-				} );
-				bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
-				bulbLight.position.set( 0, 2.5, 0 );
-				bulbLight.castShadow = true;
-				scene.add( bulbLight );
+            bulbMat = new THREE.MeshStandardMaterial( {
+                emissive: 0xcc3333,
+                emissiveIntensity: 1,
+                color: 0x000000
+            } );
+            bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
+            bulbLight.position.set( 0, 2.5, 0 );
+            bulbLight.castShadow = true;
+            scene.add( bulbLight );
         }
         function gameLoop() {
             requestAnimationFrame(gameLoop);
@@ -100,9 +125,13 @@
         function start() {
             setupMap(scene);
             setupLights(scene);
+            loadZombie(scene);
         }
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
+            
+            var delta = clock.getDelta();
+            if ( mixer ) mixer.update( delta );
         }
         function render() {
             renderer.render(scene, camera);
