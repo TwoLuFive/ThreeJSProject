@@ -29,6 +29,7 @@
             scene,
             camera,
             mixer,
+            testZombie,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
         function init() {
@@ -82,8 +83,8 @@
         function loadZombie(scene){
             var loader = new THREE.FBXLoader();
             loader.load( './test.fbx', function ( object ) {
-                object.position.set(0,0,-4);
-                object.scale.set(0.03,0.03,0.03);
+                object.position.set(0,0,-10);
+                object.scale.set(0.022,0.022,0.022);
                 
                 mixer = new THREE.AnimationMixer( object );
 
@@ -93,10 +94,9 @@
                         child.receiveShadow = true;
                     }
                 } );
-                mixer.clipAction( object.animations[2] ).play();
+                mixer.clipAction( object.animations[1] ).play();
                 scene.add( object );
-                
-            
+                testZombie = object;
             }, undefined, function ( e ) {
                 console.error( e );
             } );
@@ -127,11 +127,31 @@
             setupLights(scene);
             loadZombie(scene);
         }
+        var wait = 0;
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             
             var delta = clock.getDelta();
-            if ( mixer ) mixer.update( delta );
+
+            //update Zombie
+            if ( mixer ) mixer.update( 1/30 );
+            if(testZombie){ 
+                if(wait>0){
+                    wait -= 1/30;
+                }else{
+                    wait = -1;
+                    mixer.clipAction( testZombie.animations[0] ).play();
+                }
+                if(wait == -1){
+                    testZombie.translateZ(0.08);
+                }
+                if (testZombie.position.z > -1) {
+                    wait = Math.random()*10.0 + 5.0;
+                    testZombie.position.z = -10;
+                    mixer.stopAllAction();
+                    mixer.clipAction( testZombie.animations[1] ).play();
+                }
+            }
         }
         function render() {
             renderer.render(scene, camera);
