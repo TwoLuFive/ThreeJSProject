@@ -76,8 +76,10 @@
         }
         var light;
         function setupLights(scene) {
-            light = new THREE.PointLight(0xff3333, 5);
-            light.position.set(0, 10, 0);
+            light = new THREE.DirectionalLight(0xff9999, 0.8);
+            light.position.set(1.5, 10, 1.5);
+            light.target = camera;
+            light.castShadow = true;
             scene.add(light);
 
         }
