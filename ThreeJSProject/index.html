@@ -166,3 +166,201 @@
 </body>
 
 </html>
+<html>
+
+<head>
+    <title>threejs - models</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+
+    <script src="js/three.js"></script>
+    <script src="js/GLTFLoader.js"></script>
+    <script src="js/PointerLockControls.js"></script>
+    <script src="js/OrbitControls.js"></script>
+</head>
+
+<body>
+
+    <canvas id="myCanvas"></canvas>
+
+    <script>
+        var renderer,
+            lights,
+            isFlickering,
+            timeFlickerPassed,
+            timesLighton,
+            clock,
+            scene,
+            camera,
+            myCanvas = document.getElementById('myCanvas');
+        var timeFixed = 0;
+        const timeUntilFlicker = 0.9;
+        const timeFlicker = 1;
+        const timeLighton = 0.75;
+        const chanceFlicker = 0.15;
+        const intensityMax = 1;
+        var timeUntilFlickerCopy = 0;
+
+        function init() {
+            //SCENE
+            scene = new THREE.Scene();
+            //RENDERER
+            renderer = new THREE.WebGLRenderer({
+                canvas: myCanvas,
+                antialias: true
+            });
+            renderer.setClearColor(0x000000);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            //CAMERA
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 1.7, 0);
+            //CLOCK
+            clock = new THREE.Clock();
+
+            var controls = new THREE.PointerLockControls(camera);
+            myCanvas.addEventListener('click', function () {
+                controls.lock();
+            });
+            window.addEventListener('resize', function () {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            }
+            );
+            //var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            start();
+        }
+
+        function setupMap(scene) {
+            let loader = new THREE.GLTFLoader();
+            var mesh;
+            loader.load('models/Map.glb', function (gltf) {
+                mesh = gltf.scene;
+                mesh.children[0].material = new THREE.MeshStandardMaterial({
+                    roughness: 0.7,
+                    color: 0xffffff,
+                    metalness: 0.2
+                });
+                scene.add(mesh);
+                mesh.position.set(1.5, 0, 1.5);
+            });
+        }
+        function setupLights(scene) {
+            var bulbGeometry = new THREE.SphereBufferGeometry(0.02, 16, 8);
+            bulbLight = new THREE.PointLight(0xcc3333, 1, 100, 35);
+
+            let bulbMat = new THREE.MeshStandardMaterial({
+                emissive: 0xcc3333,
+                emissiveIntensity: 1,
+                color: 0x000000
+            });
+            bulbLight.add(new THREE.Mesh(bulbGeometry, bulbMat));
+            bulbLight.position.set(0, 2.5, 0);
+            bulbLight.castShadow = true;
+            scene.add(bulbLight);
+
+            lights[0] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[0].position.set(0, 2.5, 10);
+            scene.add(lights[0]);
+
+            lights[1] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[1].position.set(0, 2.5, -10);
+            scene.add(lights[1]);
+
+            lights[2] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[2].position.set(-10, 2.5, 0);
+            scene.add(lights[2]);
+
+            lights[3] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[3].position.set(10, 2.5, 0);
+            scene.add(lights[3]);
+        }
+        function trytoFlicker(index) {
+            if (timesLighton[index] > 0) {
+                lights[index].intensity = intensityMax;
+                timesLighton[index] += timeDelta;
+                if(timesLighton[index] >= timeLighton)
+                {
+                    lights[index].intensity = 0;
+
+                    timesLighton[index] = 0;
+                    isFlickering[index] = false;
+                }
+            }
+            else {
+                if (isFlickering[index]) {
+                    timeFlickerPassed[index] += timeDelta;
+                    lights[index].intensity = intensityMax * (Math.sin(16 * Math.PI * timeFlickerPassed[index]) + 0.5);
+                }
+                if (timeFlickerPassed[index] >= timeFlicker) {
+                    timeFlickerPassed[index] = 0;
+                    timesLighton[index] += timeDelta;
+                }
+            }
+        }
+        function gameLoop() {
+            requestAnimationFrame(gameLoop);
+            timeDelta = timeFixed;
+            timeFixed += clock.getDelta();
+            timeDelta = timeFixed - timeDelta;
+            update();
+            render();
+        }
+        function start() {
+            lights = new Array(4);
+            isFlickering = [false, false, false, false];
+            timeFlickerPassed = [0, 0, 0, 0];
+            timesLighton = [0, 0, 0, 0];
+            setupMap(scene);
+            setupLights(scene);
+
+            lights[0].intensity = 0;
+            lights[1].intensity = 0;
+            lights[2].intensity = 0;
+            lights[3].intensity = 0;
+        }
+        function update() {
+            bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
+            timeUntilFlickerCopy += timeDelta;
+            if (timeUntilFlickerCopy >= timeUntilFlicker) {
+                timeUntilFlickerCopy = 0;
+                if (Math.random() <= chanceFlicker) {
+                    isFlickering[0] = true;
+                }
+                if (Math.random() <= chanceFlicker) {
+                    isFlickering[1] = true;
+                }
+                if (Math.random() <= chanceFlicker) {
+                    isFlickering[2] = true;
+                }
+                if (Math.random() <= chanceFlicker) {
+                    isFlickering[3] = true;
+                }
+            }
+            trytoFlicker(0);
+            trytoFlicker(1);
+            trytoFlicker(2);
+            trytoFlicker(3);
+        }
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        init();
+        gameLoop();
+
+
+
+    </script>
+</body>
+
+</html>
+            bulbLight,
