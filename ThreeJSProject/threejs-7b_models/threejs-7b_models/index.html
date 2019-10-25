@@ -1,0 +1,94 @@
+<html>
+
+<head>
+    <title>threejs - models</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    
+    <script src="three.js"></script>
+    <script src="GLTFLoader.js"></script>
+    <script src="PointerLockControls.js"></script>
+        <script src="OrbitControls.js"></script>
+</head>
+
+<body>
+
+    <canvas id="myCanvas"></canvas>
+
+
+    <script>
+
+        var renderer,
+            scene,
+            camera,
+            myCanvas = document.getElementById('myCanvas');
+
+        //RENDERER
+        renderer = new THREE.WebGLRenderer({
+            canvas: myCanvas,
+            antialias: true
+        });
+        renderer.setClearColor(0x000000);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        //CAMERA
+        camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 1.7, 0);
+        //SCENE
+        scene = new THREE.Scene();
+
+        var controls = new THREE.PointerLockControls(camera);
+        myCanvas.addEventListener('click', function () {
+            controls.lock();
+        }); 
+        //var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        var mesh;
+        function setupMap(scene) {
+            
+
+            //Creates furniture along the z-Axis behind the origin.
+            loader = new THREE.GLTFLoader();
+            loader.load('Map.glb', function (gltf) {
+                mesh = gltf.scene;
+                scene.add(mesh);
+                mesh.position.set(1.5, 0, 1.5);
+            });
+        }
+        var light;
+        function setupLights(scene) {
+            light = new THREE.DirectionalLight(0xff9999, 0.8);
+            light.position.set(1.5, 10, 1.5);
+            light.target = camera;
+            light.castShadow = true;
+            scene.add(light);
+
+        }
+        //RENDER LOOP
+        setupMap(scene, 6);
+        setupLights(scene);
+        var delta = 0;
+        var prevTime = Date.now();
+
+        var timeFixed = 0;
+        var clock = new THREE.Clock();
+        render();
+
+
+        function render() 
+        {
+            timeFixed += clock.getDelta();
+            light.intensity = 2*Math.sin(timeFixed) + 3;
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+
+    </script>
+</body>
+
+</html>
