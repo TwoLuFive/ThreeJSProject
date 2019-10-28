@@ -198,13 +198,10 @@
             update();
             render();
         }
-
-        //Zombie bewegung nur Vorläufig
-        var wait = 0;
-        function update() {
-            bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
-            
-            var delta = clock.getDelta();
+                //Zombie bewegung nur Vorläufig
+                var wait = 0;
+        function updateZombies()
+        {
 
             //update Zombie
             if ( mixer ) mixer.update( 1/30 );
@@ -225,6 +222,12 @@
                     //mixer.clipAction( testZombie.animations[1] ).play();
                 }
             }
+        }
+
+        function update() {
+            bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
+            //ZOMBIES
+            updateZombies();
             //LIGHT
             timeUntilFlickerCopy += timeDelta;
             if (timeUntilFlickerCopy >= timeUntilFlicker) {
