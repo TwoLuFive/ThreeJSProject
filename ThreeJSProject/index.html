@@ -40,11 +40,11 @@
             testZombie,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
-        const timeUntilFlicker = 0.9;
+        const timeUntilFlicker = 0.7;
         const timeFlicker = 1;
         const timeLighton = 0.75;
-        const chanceFlicker = 0.15;
-        const intensityMax = 1;
+        const chanceFlicker = 0.2;
+        const intensityMax = 1.5;
         var timeUntilFlickerCopy = 0;
 
         function init() {
@@ -133,21 +133,24 @@
             bulbLight.castShadow = true;
             scene.add(bulbLight);
 
-            lights[0] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[0] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
             lights[0].position.set(0, 2.5, 10);
             scene.add(lights[0]);
 
-            lights[1] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[1] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
             lights[1].position.set(0, 2.5, -10);
             scene.add(lights[1]);
 
-            lights[2] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[2] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
             lights[2].position.set(-10, 2.5, 0);
             scene.add(lights[2]);
 
-            lights[3] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[3] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
             lights[3].position.set(10, 2.5, 0);
             scene.add(lights[3]);
+
+            /*light = new THREE.PointLight(0xffffff, intensityMax, 100, 1);
+            scene.add(light); */
         }
 
         function trytoFlicker(index) {
