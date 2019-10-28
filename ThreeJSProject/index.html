@@ -16,6 +16,7 @@
     <script src="js/inflate.min.js"></script>
     <script src="js/PointerLockControls.js"></script>
     <script src="js/OrbitControls.js"></script>
+    <script src="js/Zombie.js"></script>
 </head>
 
 <body>
@@ -36,9 +37,6 @@
             isFlickering,
             timeFlickerPassed,
             timesLighton,
-            mixer,
-            testZombie,
-            testZombieAnimation,
             spawnPoints,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
@@ -48,6 +46,8 @@
         const chanceFlicker = 0.2;
         const intensityMax = 1.5;
         var timeUntilFlickerCopy = 0;
+
+        var zombie1 = new Zombie();
 
         function init() {
             //SCENE
@@ -95,33 +95,6 @@
                 scene.add(mesh);
                 mesh.position.set(1.5, 0, 1.5);
             });
-        }
-
-        function loadZombie(scene){
-            var loader = new THREE.GLTFLoader();
-            loader.load( './models/zombie1/scene.gltf', function ( gltf ) {
-                mesh = gltf.scene;
-                mesh.scale.set(0.01,0.01,0.01);
-                mesh.children[0].material = new THREE.MeshStandardMaterial({
-                    roughness: 0.1,
-                    color: 0xffffff
-                });
-                scene.add(mesh);
-                mesh.position.set(0, 0, -2);
-                
-                mixer = new THREE.AnimationMixer( mesh );
-                mesh.traverse( function ( child ) {
-                    if ( child.isMesh ) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-                } );
-                mixer.clipAction( gltf.animations[9] ).play();
-                testZombie = mesh;
-                testZombieAnimation = gltf.animations;
-            }, undefined, function ( e ) {
-                console.error( e );
-            } );
         }
 
         function setupLights(scene) {
@@ -198,7 +171,7 @@
 
             setupMap(scene);
             setupLights(scene);
-            loadZombie(scene);
+            zombie1.load(scene);
 
             lights[0].intensity = 0;
             lights[1].intensity = 0;
@@ -222,40 +195,11 @@
         }
 
 
-        //Zombie bewegung nur Vorläufig
-        var wait = 0;
-        function updateZombies()
-        {
-            //update Zombie
-            if ( mixer ) {
-                mixer.update(timeDelta );
-            
-                if(testZombie){ 
-                    if(wait != -1){
-                        if(wait>0){
-                            wait -= timeDelta;
-                        }else{
-                            mixer.stopAllAction();
-                            mixer.clipAction( testZombieAnimation[9] ).play();
-                            wait = -1;
-                        }
-                    }else{
-                        testZombie.translateZ(0.01);
-                    }
-                    if (testZombie.position.z > -1) {
-                        wait = Math.random()*10.0 + 5.0;
-                        testZombie.position.z = -10;
-                        mixer.stopAllAction();
-                        mixer.clipAction( testZombieAnimation[0] ).play();
-                    }
-                }
-            }
-        }
 
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //ZOMBIES
-            updateZombies();
+            zombie1.update(timeDelta);
             //LIGHT
             timeUntilFlickerCopy += timeDelta;
             if (timeUntilFlickerCopy >= timeUntilFlicker) {
