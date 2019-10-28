@@ -8,6 +8,14 @@
             margin: 0;
             overflow: hidden;
         }
+
+        img {
+            position: absolute;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 40%;
+        }
     </style>
 
     <script src="js/three.js"></script>
@@ -20,12 +28,13 @@
 
 <body>
 
-    <canvas id="myCanvas"></canvas>
+    <canvas id="myCanvas">
+        <img id="imgCrosshair" , src="img/Crosshair.png">
+    </canvas>
 
     <script>
         var renderer,
             bulbLight,
-            lights,
             isFlickering,
             timeFlickerPassed,
             timesLighton,
@@ -39,6 +48,7 @@
             mixer,
             testZombie,
             spawnPoints,
+            pistol,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
         const timeUntilFlicker = 0.7;
@@ -48,6 +58,9 @@
         const intensityMax = 1.5;
         var timeUntilFlickerCopy = 0;
 
+        function getCrossProduct(vector1, vector2) {
+            return new THREE.Vector3(vector1.y * vector2.z - vector2.y * vector1.z, vector1.x * vector2.z - vector2.x * vector1.z, vector1.x * vector2.y - vector2.x * vector1.y);
+        }
         function init() {
             //SCENE
             scene = new THREE.Scene();
@@ -95,34 +108,52 @@
                 mesh.position.set(1.5, 0, 1.5);
             });
         }
+        function setupPistol(scene) {
+            let loader = new THREE.GLTFLoader();
+            var mesh;
+            loader.load('models/Pistol.glb', function (gltf) {
+                mesh = gltf.scene;
+                mesh.children[0].material = new THREE.MeshStandardMaterial({
+                    roughness: 0.7,
+                    color: 0xffffff,
+                    metalness: 0.2
+                });
+                mesh.position.set(0, 1.7, -1.5);
+                mesh.scale.set(0.33, 0.33, 0.33);
+                pistol = mesh;
 
-        function loadZombie(scene){
+                scene.add(pistol);
+            });
+
+        }
+
+        function loadZombie(scene) {
             var loader = new THREE.FBXLoader();
-            loader.load( './testOhneLicht.fbx', function ( object ) {
-                object.position.set(0,0,-10);
-                object.scale.set(0.022,0.022,0.022);
-                
-                mixer = new THREE.AnimationMixer( object );
+            loader.load('./testOhneLicht.fbx', function (object) {
+                object.position.set(0, 0, -10);
+                object.scale.set(0.022, 0.022, 0.022);
 
-                object.traverse( function ( child ) {
-                    if ( child.isMesh ) {
+                mixer = new THREE.AnimationMixer(object);
+
+                object.traverse(function (child) {
+                    if (child.isMesh) {
                         child.castShadow = true;
                         child.receiveShadow = true;
                     }
-                } );
-                mixer.clipAction( object.animations[1] ).play();
-                scene.add( object );
+                });
+                mixer.clipAction(object.animations[1]).play();
+                scene.add(object);
                 testZombie = object;
-            }, undefined, function ( e ) {
-                console.error( e );
-            } );
+            }, undefined, function (e) {
+                console.error(e);
+            });
         }
 
         function setupLights(scene) {
             var bulbGeometry = new THREE.SphereBufferGeometry(0.02, 16, 8);
             bulbLight = new THREE.PointLight(0xcc3333, 1, 100, 35);
-            var bulbGeometry = new THREE.SphereBufferGeometry( 0.02, 16, 8 );
-            bulbLight = new THREE.PointLight( 0xcc3333, 1, 100, 35);
+            var bulbGeometry = new THREE.SphereBufferGeometry(0.02, 16, 8);
+            bulbLight = new THREE.PointLight(0xcc3333, 1, 100, 35);
 
             let bulbMat = new THREE.MeshStandardMaterial({
                 emissive: 0xcc3333,
@@ -134,33 +165,32 @@
             bulbLight.castShadow = true;
             scene.add(bulbLight);
 
-            lights[0] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
-            lights[0].position.set(0, 2.5, 10);
-            scene.add(lights[0]);
-
-            lights[1] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
-            lights[1].position.set(0, 2.5, -10);
-            scene.add(lights[1]);
-
-            lights[2] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
-            lights[2].position.set(-10, 2.5, 0);
-            scene.add(lights[2]);
-
-            lights[3] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
-            lights[3].position.set(10, 2.5, 0);
-            scene.add(lights[3]);
-
-            /*light = new THREE.PointLight(0xffffff, intensityMax, 100, 1);
-            scene.add(light); */
+            for (let pathIndex = 0; pathIndex < 4; pathIndex++) {
+                lights[pathIndex] = new Array(3);
+                for (let lightIndex = 0; lightIndex < 3; lightIndex++) {
+                    lights[pathIndex][lightIndex] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
+                    switch (pathIndex) {
+                        case 0: lights[pathIndex][lightIndex].position.set(0, 2.5, 10 * lightIndex); break;
+                        case 1: lights[pathIndex][lightIndex].position.set(0, 2.5, -10 * lightIndex); break;
+                        case 2: lights[pathIndex][lightIndex].position.set(10 * lightIndex, 2.5, 0); break;
+                        case 3: lights[pathIndex][lightIndex].position.set(-10 * lightIndex, 2.5, 0); break;
+                    }
+                    lights[pathIndex][lightIndex].intensity = 0;
+                    scene.add(lights[pathIndex][lightIndex]);
+                }
+            }
+            light = new THREE.PointLight(0xffffff, 3, 100, 1);
+            scene.add(light);
         }
 
-        function trytoFlicker(index) {
+        function trytoFlicker(pathIndex, lightIndex) {
+
+            index = pathIndex * lightIndex + lightIndex;
             if (timesLighton[index] > 0) {
-                lights[index].intensity = intensityMax;
+                lights[pathIndex, lightIndex].intensity = intensityMax;
                 timesLighton[index] += timeDelta;
-                if(timesLighton[index] >= timeLighton)
-                {
-                    lights[index].intensity = 0;
+                if (timesLighton[index] >= timeLighton) {
+                    lights[pathIndex, lightIndex].intensity = 0;
 
                     timesLighton[index] = 0;
                     isFlickering[index] = false;
@@ -169,7 +199,7 @@
             else {
                 if (isFlickering[index]) {
                     timeFlickerPassed[index] += timeDelta;
-                    lights[index].intensity = intensityMax * (Math.sin(16 * Math.PI * timeFlickerPassed[index]) + 0.5);
+                    lights[pathIndex, lightIndex].intensity = intensityMax * (Math.sin(16 * Math.PI * timeFlickerPassed[index]) + 0.5);
                 }
                 if (timeFlickerPassed[index] >= timeFlicker) {
                     timeFlickerPassed[index] = 0;
@@ -180,9 +210,15 @@
 
         function start() {
             lights = new Array(4);
-            isFlickering = [false, false, false, false];
-            timeFlickerPassed = [0, 0, 0, 0];
-            timesLighton = [0, 0, 0, 0];
+            isFlickering = [false, false, false, false,
+                false, false, false, false,
+                false, false, false, false];
+            timeFlickerPassed = [0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0];
+            timesLighton = [0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0];
             spawnPoints = new Array(4);
 
             spawnPoints[0] = new THREE.Vector3(0, 0, 0);
@@ -192,12 +228,8 @@
 
             setupMap(scene);
             setupLights(scene);
+            setupPistol(scene);
             loadZombie(scene);
-
-            lights[0].intensity = 0;
-            lights[1].intensity = 0;
-            lights[2].intensity = 0;
-            lights[3].intensity = 0;
         }
 
         function gameLoop() {
@@ -209,30 +241,48 @@
             update();
             render();
         }
-        function doesZombieHitPlayer(player, zombie)
-        {
+        function doesZombieHitPlayer(player, zombie) {
             //No implementation yet.
             return false;
         }
-                //Zombie bewegung nur Vorläufig
-                var wait = 0;
-        function updateZombies()
-        {
+        function updatePistol() {
+            let directionCamera = new THREE.Vector3(0, 0, 0);
+            var axis = new THREE.Vector3(0, 1, 0);
+            camera.getWorldDirection(directionCamera);
+            pistol.position.set(
+                camera.position.x + directionCamera.x,
+                camera.position.y + directionCamera.y - 0.3,
+                camera.position.z + directionCamera.z,
+            );
+            let vectorSide = getCrossProduct(axis, directionCamera);
+            vectorSide = vectorSide.normalize();
+            pistol.position.set(
+                pistol.position.x - vectorSide.x * 0.2,
+                pistol.position.y - vectorSide.y * 0.2,
+                pistol.position.z - vectorSide.z * 0.2
+            );
+            pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+
+            pistol.rotateY(95 / 180 * Math.PI);
+        }
+        //Zombie bewegung nur Vorläufig
+        var wait = 0;
+        function updateZombies() {
 
             //update Zombie
-            if ( mixer ) mixer.update(timeDelta );
-            if(testZombie){ 
-                if(wait>0){
+            if (mixer) mixer.update(timeDelta);
+            if (testZombie) {
+                if (wait > 0) {
                     wait -= timeDelta;
-                }else{
+                } else {
                     wait = -1;
-                    mixer.clipAction( testZombie.animations[0] ).play();
+                    mixer.clipAction(testZombie.animations[0]).play();
                 }
-                if(wait == -1){
+                if (wait == -1) {
                     testZombie.translateZ(0.08);
                 }
                 if (testZombie.position.z > -1) {
-                    wait = Math.random()*10.0 + 5.0;
+                    wait = Math.random() * 10.0 + 5.0;
                     testZombie.position.z = -10;
                     mixer.stopAllAction();
                     //mixer.clipAction( testZombie.animations[1] ).play();
@@ -242,31 +292,27 @@
 
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
+            //PISTOL
+            updatePistol();
             //ZOMBIES
             updateZombies();
             //LIGHT
             timeUntilFlickerCopy += timeDelta;
             if (timeUntilFlickerCopy >= timeUntilFlicker) {
                 timeUntilFlickerCopy = 0;
-                if (Math.random() <= chanceFlicker) {
-                    isFlickering[0] = true;
-                }
-                if (Math.random() <= chanceFlicker) {
-                    isFlickering[1] = true;
-                }
-                if (Math.random() <= chanceFlicker) {
-                    isFlickering[2] = true;
-                }
-                if (Math.random() <= chanceFlicker) {
-                    isFlickering[3] = true;
+                for (let i = 0; i < lights.length * lights[0].length; i++) {
+                    if (Math.random() <= chanceFlicker) {
+                        isFlickering[i] = true;
+                    }
                 }
             }
-            trytoFlicker(0);
-            trytoFlicker(1);
-            trytoFlicker(2);
-            trytoFlicker(3);
+            for (let pathIndex = 0; pathIndex < 4; pathIndex++) {
+                for (let lightIndex = 0; lightIndex < 3; lightIndex++) {
+                    trytoFlicker(pathIndex, lightIndex);
+                }
+            }
         }
-        
+
         function render() {
             renderer.render(scene, camera);
         }
