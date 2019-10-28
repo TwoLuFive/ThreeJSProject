@@ -56,7 +56,7 @@
                 canvas: myCanvas,
                 antialias: true
             });
-            renderer.setClearColor(0x00000);
+            renderer.setClearColor(0x000000);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
@@ -98,9 +98,9 @@
 
         function loadZombie(scene){
             var loader = new THREE.FBXLoader();
-            loader.load( './testOhneLicht.fbx', function ( object ) {
-                object.position.set(0,0,-10);
-                object.scale.set(0.022,0.022,0.022);
+            loader.load( './zombie1155/source/animations/Zombie@Z_Walk_InPlace.fbx', function ( object ) {
+                object.position.set(0,0,-4);
+                object.scale.set(0.015,0.015,0.015);
                 
                 mixer = new THREE.AnimationMixer( object );
 
@@ -110,7 +110,7 @@
                         child.receiveShadow = true;
                     }
                 } );
-                mixer.clipAction( object.animations[1] ).play();
+                mixer.clipAction( object.animations[0] ).play();
                 scene.add( object );
                 testZombie = object;
             }, undefined, function ( e ) {
