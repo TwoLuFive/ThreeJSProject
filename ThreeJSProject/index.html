@@ -38,6 +38,7 @@
             timesLighton,
             mixer,
             testZombie,
+            testZombieAnimation,
             spawnPoints,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
@@ -97,22 +98,27 @@
         }
 
         function loadZombie(scene){
-            var loader = new THREE.FBXLoader();
-            loader.load( './zombie1155/source/animations/Zombie@Z_Walk_InPlace.fbx', function ( object ) {
-                object.position.set(0,0,-4);
-                object.scale.set(0.015,0.015,0.015);
+            var loader = new THREE.GLTFLoader();
+            loader.load( './models/zombie1/scene.gltf', function ( gltf ) {
+                mesh = gltf.scene;
+                mesh.scale.set(0.01,0.01,0.01);
+                mesh.children[0].material = new THREE.MeshStandardMaterial({
+                    roughness: 0.1,
+                    color: 0xffffff
+                });
+                scene.add(mesh);
+                mesh.position.set(0, 0, -2);
                 
-                mixer = new THREE.AnimationMixer( object );
-
-                object.traverse( function ( child ) {
+                mixer = new THREE.AnimationMixer( mesh );
+                mesh.traverse( function ( child ) {
                     if ( child.isMesh ) {
                         child.castShadow = true;
                         child.receiveShadow = true;
                     }
                 } );
-                mixer.clipAction( object.animations[0] ).play();
-                scene.add( object );
-                testZombie = object;
+                mixer.clipAction( gltf.animations[9] ).play();
+                testZombie = mesh;
+                testZombieAnimation = gltf.animations;
             }, undefined, function ( e ) {
                 console.error( e );
             } );
@@ -214,28 +220,34 @@
             //No implementation yet.
             return false;
         }
-                //Zombie bewegung nur Vorläufig
-                var wait = 0;
+
+
+        //Zombie bewegung nur Vorläufig
+        var wait = 0;
         function updateZombies()
         {
-
             //update Zombie
-            if ( mixer ) mixer.update(timeDelta );
-            if(testZombie){ 
-                if(wait>0){
-                    wait -= timeDelta;
-                }else{
-                    wait = -1;
-                    mixer.clipAction( testZombie.animations[0] ).play();
-                }
-                if(wait == -1){
-                    testZombie.translateZ(0.08);
-                }
-                if (testZombie.position.z > -1) {
-                    wait = Math.random()*10.0 + 5.0;
-                    testZombie.position.z = -10;
-                    mixer.stopAllAction();
-                    //mixer.clipAction( testZombie.animations[1] ).play();
+            if ( mixer ) {
+                mixer.update(timeDelta );
+            
+                if(testZombie){ 
+                    if(wait != -1){
+                        if(wait>0){
+                            wait -= timeDelta;
+                        }else{
+                            mixer.stopAllAction();
+                            mixer.clipAction( testZombieAnimation[9] ).play();
+                            wait = -1;
+                        }
+                    }else{
+                        testZombie.translateZ(0.01);
+                    }
+                    if (testZombie.position.z > -1) {
+                        wait = Math.random()*10.0 + 5.0;
+                        testZombie.position.z = -10;
+                        mixer.stopAllAction();
+                        mixer.clipAction( testZombieAnimation[0] ).play();
+                    }
                 }
             }
         }
