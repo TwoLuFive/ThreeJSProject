@@ -17,6 +17,7 @@
     <script src="js/PointerLockControls.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/Zombie.js"></script>
+    <script src="js/ZombieController.js"></script>
 </head>
 
 <body>
@@ -37,7 +38,6 @@
             isFlickering,
             timeFlickerPassed,
             timesLighton,
-            spawnPoints,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
         const timeUntilFlicker = 0.7;
@@ -47,7 +47,7 @@
         const intensityMax = 1.5;
         var timeUntilFlickerCopy = 0;
 
-        var zombie1 = new Zombie();
+        var zombieController = new ZombieController();
 
         function init() {
             //SCENE
@@ -129,8 +129,8 @@
             lights[3].position.set(10, 2.5, 0);
             scene.add(lights[3]);
 
-            /*light = new THREE.PointLight(0xffffff, intensityMax, 100, 1);
-            scene.add(light); */
+            light = new THREE.PointLight(0xffffff, intensityMax, 100, 1);
+            scene.add(light); 
         }
 
         function trytoFlicker(index) {
@@ -162,16 +162,11 @@
             isFlickering = [false, false, false, false];
             timeFlickerPassed = [0, 0, 0, 0];
             timesLighton = [0, 0, 0, 0];
-            spawnPoints = new Array(4);
-
-            spawnPoints[0] = new THREE.Vector3(0, 0, 0);
-            spawnPoints[1] = new THREE.Vector3(0, 0, 0);
-            spawnPoints[2] = new THREE.Vector3(0, 0, 0);
-            spawnPoints[3] = new THREE.Vector3(0, 0, 0);
 
             setupMap(scene);
             setupLights(scene);
-            zombie1.load(scene);
+            zombieController.load(scene);
+            
 
             lights[0].intensity = 0;
             lights[1].intensity = 0;
@@ -188,18 +183,13 @@
             update();
             render();
         }
-        function doesZombieHitPlayer(player, zombie)
-        {
-            //No implementation yet.
-            return false;
-        }
 
 
 
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //ZOMBIES
-            zombie1.update(timeDelta);
+            zombieController.update(timeDelta);
             //LIGHT
             timeUntilFlickerCopy += timeDelta;
             if (timeUntilFlickerCopy >= timeUntilFlicker) {
