@@ -38,6 +38,7 @@
             timesLighton,
             mixer,
             testZombie,
+            spawnPoints,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
         const timeUntilFlicker = 0.7;
@@ -182,6 +183,13 @@
             isFlickering = [false, false, false, false];
             timeFlickerPassed = [0, 0, 0, 0];
             timesLighton = [0, 0, 0, 0];
+            spawnPoints = new Array(4);
+
+            spawnPoints[0] = new THREE.Vector3(0, 0, 0);
+            spawnPoints[1] = new THREE.Vector3(0, 0, 0);
+            spawnPoints[2] = new THREE.Vector3(0, 0, 0);
+            spawnPoints[3] = new THREE.Vector3(0, 0, 0);
+
             setupMap(scene);
             setupLights(scene);
             loadZombie(scene);
@@ -201,16 +209,21 @@
             update();
             render();
         }
+        function doesZombieHitPlayer(player, zombie)
+        {
+            //No implementation yet.
+            return false;
+        }
                 //Zombie bewegung nur Vorläufig
                 var wait = 0;
         function updateZombies()
         {
 
             //update Zombie
-            if ( mixer ) mixer.update( 1/30 );
+            if ( mixer ) mixer.update(timeDelta );
             if(testZombie){ 
                 if(wait>0){
-                    wait -= 1/30;
+                    wait -= timeDelta;
                 }else{
                     wait = -1;
                     mixer.clipAction( testZombie.animations[0] ).play();
