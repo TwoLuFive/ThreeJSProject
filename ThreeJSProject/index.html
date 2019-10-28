@@ -148,36 +148,6 @@
             lights[3] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
             lights[3].position.set(10, 2.5, 0);
             scene.add(lights[3]);
-            bulbMat = new THREE.MeshStandardMaterial( {
-                emissive: 0xcc3333,
-                emissiveIntensity: 1,
-                color: 0x000000
-            } );
-            
-            bulbLight.add(new THREE.Mesh(bulbGeometry, bulbMat));
-            bulbLight.position.set(0, 2.5, 0);
-            bulbLight.castShadow = true;
-            scene.add(bulbLight);
-
-            lights[0] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
-            lights[0].position.set(0, 2.5, 10);
-            scene.add(lights[0]);
-
-            lights[1] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
-            lights[1].position.set(0, 2.5, -10);
-            scene.add(lights[1]);
-
-            lights[2] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
-            lights[2].position.set(-10, 2.5, 0);
-            scene.add(lights[2]);
-
-            lights[3] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
-            lights[3].position.set(10, 2.5, 0);
-            scene.add(lights[3]);
-
-            var light = new THREE.PointLight(0xffffff, intensityMax, 100, 1);
-            light.position.set(0, 5, 0);
-            scene.add(light);
         }
 
         function trytoFlicker(index) {
