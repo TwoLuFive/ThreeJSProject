@@ -24,6 +24,7 @@
     <script src="js/inflate.min.js"></script>
     <script src="js/PointerLockControls.js"></script>
     <script src="js/OrbitControls.js"></script>
+    <script src="js/Zombie.js"></script>
 </head>
 
 <body>
@@ -45,8 +46,6 @@
             isFlickering,
             timeFlickerPassed,
             timesLighton,
-            mixer,
-            testZombie,
             spawnPoints,
             pistol,
             myCanvas = document.getElementById('myCanvas');
@@ -61,6 +60,8 @@
         function getCrossProduct(vector1, vector2) {
             return new THREE.Vector3(vector1.y * vector2.z - vector2.y * vector1.z, vector1.x * vector2.z - vector2.x * vector1.z, vector1.x * vector2.y - vector2.x * vector1.y);
         }
+        var zombie1 = new Zombie();
+
         function init() {
             //SCENE
             scene = new THREE.Scene();
@@ -69,7 +70,7 @@
                 canvas: myCanvas,
                 antialias: true
             });
-            renderer.setClearColor(0x00000);
+            renderer.setClearColor(0x000000);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
@@ -125,28 +126,6 @@
                 scene.add(pistol);
             });
 
-        }
-
-        function loadZombie(scene) {
-            var loader = new THREE.FBXLoader();
-            loader.load('./testOhneLicht.fbx', function (object) {
-                object.position.set(0, 0, -10);
-                object.scale.set(0.022, 0.022, 0.022);
-
-                mixer = new THREE.AnimationMixer(object);
-
-                object.traverse(function (child) {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-                });
-                mixer.clipAction(object.animations[1]).play();
-                scene.add(object);
-                testZombie = object;
-            }, undefined, function (e) {
-                console.error(e);
-            });
         }
 
         function setupLights(scene) {
@@ -229,7 +208,7 @@
             setupMap(scene);
             setupLights(scene);
             setupPistol(scene);
-            loadZombie(scene);
+            zombie1.load(scene);
         }
 
         function gameLoop() {
@@ -265,37 +244,13 @@
 
             pistol.rotateY(95 / 180 * Math.PI);
         }
-        //Zombie bewegung nur Vorläufig
-        var wait = 0;
-        function updateZombies() {
-
-            //update Zombie
-            if (mixer) mixer.update(timeDelta);
-            if (testZombie) {
-                if (wait > 0) {
-                    wait -= timeDelta;
-                } else {
-                    wait = -1;
-                    mixer.clipAction(testZombie.animations[0]).play();
-                }
-                if (wait == -1) {
-                    testZombie.translateZ(0.08);
-                }
-                if (testZombie.position.z > -1) {
-                    wait = Math.random() * 10.0 + 5.0;
-                    testZombie.position.z = -10;
-                    mixer.stopAllAction();
-                    //mixer.clipAction( testZombie.animations[1] ).play();
-                }
-            }
-        }
-
+        
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //PISTOL
             updatePistol();
             //ZOMBIES
-            updateZombies();
+            zombie1.update(timeDelta);
             //LIGHT
             timeUntilFlickerCopy += timeDelta;
             if (timeUntilFlickerCopy >= timeUntilFlicker) {
