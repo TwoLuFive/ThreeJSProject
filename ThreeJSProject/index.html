@@ -24,7 +24,11 @@
 
     <script>
         var renderer,
-        bulbLight,
+            bulbLight,
+            lights,
+            isFlickering,
+            timeFlickerPassed,
+            timesLighton,
             clock,
             scene,
             camera,
@@ -57,7 +61,7 @@
             document.body.appendChild(renderer.domElement);
 
             //CAMERA
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(0, 1.7, 0);
             //CLOCK
             clock = new THREE.Clock();
@@ -81,11 +85,11 @@
             var mesh;
             loader.load('models/Map.glb', function (gltf) {
                 mesh = gltf.scene;
-                mesh.children[0].material = new THREE.MeshStandardMaterial( {
-					roughness: 0.7,
-					color: 0xffffff,
-					metalness: 0.2
-				} );
+                mesh.children[0].material = new THREE.MeshStandardMaterial({
+                    roughness: 0.7,
+                    color: 0xffffff,
+                    metalness: 0.2
+                });
                 scene.add(mesh);
                 mesh.position.set(1.5, 0, 1.5);
             });
@@ -114,9 +118,36 @@
         }
 
         function setupLights(scene) {
+            var bulbGeometry = new THREE.SphereBufferGeometry(0.02, 16, 8);
+            bulbLight = new THREE.PointLight(0xcc3333, 1, 100, 35);
             var bulbGeometry = new THREE.SphereBufferGeometry( 0.02, 16, 8 );
             bulbLight = new THREE.PointLight( 0xcc3333, 1, 100, 35);
 
+            let bulbMat = new THREE.MeshStandardMaterial({
+                emissive: 0xcc3333,
+                emissiveIntensity: 1,
+                color: 0x000000
+            });
+            bulbLight.add(new THREE.Mesh(bulbGeometry, bulbMat));
+            bulbLight.position.set(0, 2.5, 0);
+            bulbLight.castShadow = true;
+            scene.add(bulbLight);
+
+            lights[0] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[0].position.set(0, 2.5, 10);
+            scene.add(lights[0]);
+
+            lights[1] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[1].position.set(0, 2.5, -10);
+            scene.add(lights[1]);
+
+            lights[2] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[2].position.set(-10, 2.5, 0);
+            scene.add(lights[2]);
+
+            lights[3] = new THREE.PointLight(0xffcccc, intensityMax, 100, 32);
+            lights[3].position.set(10, 2.5, 0);
+            scene.add(lights[3]);
             bulbMat = new THREE.MeshStandardMaterial( {
                 emissive: 0xcc3333,
                 emissiveIntensity: 1,
@@ -249,6 +280,7 @@
 
         init();
         gameLoop();
+
 
 
 
