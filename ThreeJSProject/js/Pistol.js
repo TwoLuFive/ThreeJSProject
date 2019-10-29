@@ -32,9 +32,13 @@ function Pistol() {
             object.mixer.update(timeDelta );
         }
     }
-    this.trytoShoot = function()
+    this.trytoShoot = function(camera)
     {
         console.log(object.animations.length);
+        let directionCamera = new THREE.Vector3(0, 0, 0);
+        camera.getWorldDirection(directionCamera);
+        let target = new THREE.Vector3(camera.position.x + directionCamera.x,camera.position.y + directionCamera.y,camera.position.z + directionCamera.z )
+        camera.lookAt(new THREE.Vector3(target.x  + Math.random() *  0.005, target.y + Math.random() *  0.1, target.z  + Math.random() *  0.005));
         object.mixer.clipAction( object.animations[0] ).play();
     }
 }

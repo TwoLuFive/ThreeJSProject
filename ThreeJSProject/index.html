@@ -159,7 +159,7 @@
         function setupInputs() {
             document.addEventListener('keydown',
                 function (event) {
-                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: pistol.trytoShoot(); break;}
+                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: pistol.trytoShoot(camera); break;}
                 }, false);
             document.addEventListener('keyup', function (event) {
                 switch (event.keyCode) { case 69: isAiming = false; }
