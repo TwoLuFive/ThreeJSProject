@@ -33,6 +33,7 @@
     <script src="js/PointerLockControls.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/Zombie.js"></script>
+    <script src="js/Pistol.js"></script>
     <script src="js/ZombieController.js"></script>
 </head>
 
@@ -121,24 +122,6 @@
                 mesh.position.set(1.5, 0, 1.5);
             });
         }
-        function setupPistol(scene) {
-            let loader = new THREE.GLTFLoader();
-            var mesh;
-            loader.load('models/Pistol.glb', function (gltf) {
-                mesh = gltf.scene;
-                mesh.children[0].material = new THREE.MeshStandardMaterial({
-                    roughness: 0.7,
-                    color: 0xffffff,
-                    metalness: 0.2
-                });
-                mesh.position.set(0, 1.7, -1.5);
-                mesh.scale.set(0.33, 0.33, 0.33);
-                pistol = mesh;
-
-                scene.add(pistol);
-            });
-
-        }
 
         function setupLights(scene) {
             var bulbGeometry = new THREE.SphereBufferGeometry(0.02, 16, 8);
@@ -176,7 +159,7 @@
         function setupInputs() {
             document.addEventListener('keydown',
                 function (event) {
-                    switch (event.keyCode) { case 69: isAiming = true; }
+                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: pistol.trytoShoot(); break;}
                 }, false);
             document.addEventListener('keyup', function (event) {
                 switch (event.keyCode) { case 69: isAiming = false; }
@@ -203,7 +186,8 @@
             setupInputs();
             setupMap(scene);
             setupLights(scene);
-            setupPistol(scene);
+            pistol = new Pistol();
+            pistol.load(scene);
             zombieController.load(scene);
         }
 
@@ -223,18 +207,18 @@
 
 
             if (isAiming == true) {
-                pistol.position.set(
+                pistol.mesh.position.set(
                     camera.position.x + directionCamera.x,
                     camera.position.y + directionCamera.y - 0.2,
                     camera.position.z + directionCamera.z,
                 );
-                pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
-                pistol.rotateY(90 / 180 * Math.PI);
+                pistol.mesh.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+                pistol.mesh.rotateY(90 / 180 * Math.PI);
 
                 crosshairImg.style.visibility = 'hidden';
             }
             else {
-                pistol.position.set(
+                pistol.mesh.position.set(
                     camera.position.x + directionCamera.x,
                     camera.position.y + directionCamera.y - 0.3,
                     camera.position.z + directionCamera.z,
@@ -242,18 +226,17 @@
 
                 let vectorSide = getCrossProduct(axis, directionCamera);
                 vectorSide = vectorSide.normalize();
-                pistol.position.set(
-                    pistol.position.x - vectorSide.x * 0.2,
-                    pistol.position.y - vectorSide.y * 0.2,
-                    pistol.position.z - vectorSide.z * 0.2
+                pistol.mesh.position.set(
+                    pistol.mesh.position.x - vectorSide.x * 0.2,
+                    pistol.mesh.position.y - vectorSide.y * 0.2,
+                    pistol.mesh.position.z - vectorSide.z * 0.2
                 );
-                pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
-                pistol.rotateY(95 / 180 * Math.PI);
+                pistol.mesh.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+                pistol.mesh.rotateY(95 / 180 * Math.PI);
 
                 crosshairImg.style.visibility = 'visible';
             }
         }
-
         function trytoFlicker(pathIndex, lightIndex) {
 
             index = pathIndex * lights.length + lightIndex;
@@ -281,6 +264,7 @@
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //PISTOL
+            pistol.update();
             updatePistol();
             //ZOMBIES
             zombieController.update(timeDelta);
