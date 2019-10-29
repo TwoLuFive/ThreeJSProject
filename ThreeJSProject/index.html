@@ -36,10 +36,10 @@
 </head>
 
 <body>
-        <img id="imgCrosshair"; src="img/Crosshair.png">
+    <img id="imgCrosshair" ; src="img/Crosshair.png">
     <canvas id="myCanvas">
     </canvas>
-            
+
 
     <script>
 
@@ -57,6 +57,7 @@
             timesLighton,
             spawnPoints,
             pistol,
+            isAiming,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
         const timeUntilFlicker = 0.7;
@@ -195,7 +196,17 @@
                 }
             }
         }
-
+        function setupInputs() {
+            document.addEventListener('keydown',
+                function (event) {
+                    switch (event.keyCode) 
+                    { case 69: isAiming = true; }
+                }, false);
+            document.addEventListener('keyup', function (event) {
+                    switch (event.keyCode) 
+                    { case 69: isAiming = false; }
+                }, false);
+        }
         function start() {
             lights = new Array(4);
             isFlickering = [false, false, false, false,
@@ -214,6 +225,7 @@
             spawnPoints[2] = new THREE.Vector3(0, 0, 0);
             spawnPoints[3] = new THREE.Vector3(0, 0, 0);
 
+            setupInputs();
             setupMap(scene);
             setupLights(scene);
             setupPistol(scene);
@@ -237,23 +249,35 @@
             let directionCamera = new THREE.Vector3(0, 0, 0);
             var axis = new THREE.Vector3(0, 1, 0);
             camera.getWorldDirection(directionCamera);
-            pistol.position.set(
+
+
+            if (isAiming == true) {
+                pistol.position.set(
+                camera.position.x + directionCamera.x,
+                camera.position.y + directionCamera.y - 0.2,
+                camera.position.z + directionCamera.z,
+            );
+                pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+                pistol.rotateY(90 / 180 * Math.PI);
+            }
+            else {
+                pistol.position.set(
                 camera.position.x + directionCamera.x,
                 camera.position.y + directionCamera.y - 0.3,
                 camera.position.z + directionCamera.z,
             );
-            let vectorSide = getCrossProduct(axis, directionCamera);
-            vectorSide = vectorSide.normalize();
-            pistol.position.set(
-                pistol.position.x - vectorSide.x * 0.2,
-                pistol.position.y - vectorSide.y * 0.2,
-                pistol.position.z - vectorSide.z * 0.2
-            );
-            pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
 
-            pistol.rotateY(95 / 180 * Math.PI);
+                let vectorSide = getCrossProduct(axis, directionCamera);
+                vectorSide = vectorSide.normalize();
+                pistol.position.set(
+                    pistol.position.x - vectorSide.x * 0.2,
+                    pistol.position.y - vectorSide.y * 0.2,
+                    pistol.position.z - vectorSide.z * 0.2
+                );
+                pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+                pistol.rotateY(95 / 180 * Math.PI);
+            }
         }
-
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //PISTOL
@@ -286,6 +310,6 @@
 
 
 
-    
+
     </script>
 </body>
