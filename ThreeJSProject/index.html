@@ -61,9 +61,9 @@
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
         const timeUntilFlicker = 0.7;
-        const timeFlicker = 1;
+        const timeFlicker = 0.6;
         const timeLighton = 0.75;
-        const chanceFlicker = 0.2;
+        const chanceFlicker = 0.15;
         const intensityMax = 1.5;
         var timeUntilFlickerCopy = 0;
 
@@ -159,53 +159,26 @@
                 for (let lightIndex = 0; lightIndex < 3; lightIndex++) {
                     lights[pathIndex][lightIndex] = new THREE.PointLight(0xffcccc, intensityMax, 100, 30);
                     switch (pathIndex) {
-                        case 0: lights[pathIndex][lightIndex].position.set(0, 2.5, 10 * lightIndex); break;
-                        case 1: lights[pathIndex][lightIndex].position.set(0, 2.5, -10 * lightIndex); break;
-                        case 2: lights[pathIndex][lightIndex].position.set(10 * lightIndex, 2.5, 0); break;
-                        case 3: lights[pathIndex][lightIndex].position.set(-10 * lightIndex, 2.5, 0); break;
+                        case 0: lights[pathIndex][lightIndex].position.set(0, 2.5, 10 * (lightIndex + 1)); break;
+                        case 1: lights[pathIndex][lightIndex].position.set(0, 2.5, -10 * (lightIndex + 1)); break;
+                        case 2: lights[pathIndex][lightIndex].position.set(10 * (lightIndex + 1), 2.5, 0); break;
+                        case 3: lights[pathIndex][lightIndex].position.set(-10 * (lightIndex + 1), 2.5, 0); break;
                     }
                     lights[pathIndex][lightIndex].intensity = 0;
                     scene.add(lights[pathIndex][lightIndex]);
                 }
             }
-            light = new THREE.PointLight(0xffffff, 3, 100, 1);
-            scene.add(light);
-        }
-
-        function trytoFlicker(pathIndex, lightIndex) {
-
-            index = pathIndex * lightIndex + lightIndex;
-            if (timesLighton[index] > 0) {
-                lights[pathIndex, lightIndex].intensity = intensityMax;
-                timesLighton[index] += timeDelta;
-                if (timesLighton[index] >= timeLighton) {
-                    lights[pathIndex, lightIndex].intensity = 0;
-
-                    timesLighton[index] = 0;
-                    isFlickering[index] = false;
-                }
-            }
-            else {
-                if (isFlickering[index]) {
-                    timeFlickerPassed[index] += timeDelta;
-                    lights[pathIndex, lightIndex].intensity = intensityMax * (Math.sin(16 * Math.PI * timeFlickerPassed[index]) + 0.5);
-                }
-                if (timeFlickerPassed[index] >= timeFlicker) {
-                    timeFlickerPassed[index] = 0;
-                    timesLighton[index] += timeDelta;
-                }
-            }
+            /*light = new THREE.PointLight(0xffffff, 3, 100, 1);
+            scene.add(light); */
         }
         function setupInputs() {
             document.addEventListener('keydown',
                 function (event) {
-                    switch (event.keyCode) 
-                    { case 69: isAiming = true; }
+                    switch (event.keyCode) { case 69: isAiming = true; }
                 }, false);
             document.addEventListener('keyup', function (event) {
-                    switch (event.keyCode) 
-                    { case 69: isAiming = false; }
-                }, false);
+                switch (event.keyCode) { case 69: isAiming = false; }
+            }, false);
         }
         function start() {
             lights = new Array(4);
@@ -253,19 +226,19 @@
 
             if (isAiming == true) {
                 pistol.position.set(
-                camera.position.x + directionCamera.x,
-                camera.position.y + directionCamera.y - 0.2,
-                camera.position.z + directionCamera.z,
-            );
+                    camera.position.x + directionCamera.x,
+                    camera.position.y + directionCamera.y - 0.2,
+                    camera.position.z + directionCamera.z,
+                );
                 pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
                 pistol.rotateY(90 / 180 * Math.PI);
             }
             else {
                 pistol.position.set(
-                camera.position.x + directionCamera.x,
-                camera.position.y + directionCamera.y - 0.3,
-                camera.position.z + directionCamera.z,
-            );
+                    camera.position.x + directionCamera.x,
+                    camera.position.y + directionCamera.y - 0.3,
+                    camera.position.z + directionCamera.z,
+                );
 
                 let vectorSide = getCrossProduct(axis, directionCamera);
                 vectorSide = vectorSide.normalize();
@@ -276,6 +249,31 @@
                 );
                 pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
                 pistol.rotateY(95 / 180 * Math.PI);
+            }
+        }
+
+        function trytoFlicker(pathIndex, lightIndex) {
+
+            index = pathIndex * lights.length + lightIndex;
+            if (timesLighton[index] > 0) {
+                lights[pathIndex][lightIndex].intensity = intensityMax;
+                timesLighton[index] += timeDelta;
+                if (timesLighton[index] >= timeLighton) {
+                    lights[pathIndex][lightIndex].intensity = 0;
+
+                    timesLighton[index] = 0;
+                    isFlickering[index] = false;
+                }
+            }
+            else {
+                if (isFlickering[index]) {
+                    timeFlickerPassed[index] += timeDelta;
+                    lights[pathIndex][lightIndex].intensity = intensityMax * (Math.sin(16 * Math.PI * timeFlickerPassed[index]) + 0.5);
+                }
+                if (timeFlickerPassed[index] >= timeFlicker) {
+                    timeFlickerPassed[index] = 0;
+                    timesLighton[index] += timeDelta;
+                }
             }
         }
         function update() {
