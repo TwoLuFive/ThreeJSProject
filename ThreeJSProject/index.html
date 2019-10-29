@@ -52,6 +52,7 @@
             scene,
             camera,
             lights,
+            crosshairImg = document.getElementById('imgCrosshair'), 
             isFlickering,
             timeFlickerPassed,
             timesLighton,
@@ -232,6 +233,8 @@
                 );
                 pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
                 pistol.rotateY(90 / 180 * Math.PI);
+
+                crosshairImg.style.visibility = 'hidden';
             }
             else {
                 pistol.position.set(
@@ -249,6 +252,8 @@
                 );
                 pistol.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
                 pistol.rotateY(95 / 180 * Math.PI);
+
+                crosshairImg.style.visibility = 'visible';
             }
         }
 
