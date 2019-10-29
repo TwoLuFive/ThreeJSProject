@@ -33,6 +33,7 @@
     <script src="js/PointerLockControls.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/Zombie.js"></script>
+    <script src="js/ZombieController.js"></script>
 </head>
 
 <body>
@@ -71,7 +72,7 @@
         function getCrossProduct(vector1, vector2) {
             return new THREE.Vector3(vector1.y * vector2.z - vector2.y * vector1.z, vector1.x * vector2.z - vector2.x * vector1.z, vector1.x * vector2.y - vector2.x * vector1.y);
         }
-        var zombie1 = new Zombie();
+        var zombieController = new ZombieController();
 
         function init() {
             //SCENE
@@ -169,8 +170,8 @@
                     scene.add(lights[pathIndex][lightIndex]);
                 }
             }
-            /*light = new THREE.PointLight(0xffffff, 3, 100, 1);
-            scene.add(light); */
+            light = new THREE.PointLight(0xffffff, 3, 100, 1);
+            scene.add(light); 
         }
         function setupInputs() {
             document.addEventListener('keydown',
@@ -203,7 +204,7 @@
             setupMap(scene);
             setupLights(scene);
             setupPistol(scene);
-            zombie1.load(scene);
+            zombieController.load(scene);
         }
 
         function gameLoop() {
@@ -214,10 +215,6 @@
 
             update();
             render();
-        }
-        function doesZombieHitPlayer(player, zombie) {
-            //No implementation yet.
-            return false;
         }
         function updatePistol() {
             let directionCamera = new THREE.Vector3(0, 0, 0);
@@ -286,7 +283,7 @@
             //PISTOL
             updatePistol();
             //ZOMBIES
-            zombie1.update(timeDelta);
+            zombieController.update(timeDelta);
             //LIGHT
             timeUntilFlickerCopy += timeDelta;
             if (timeUntilFlickerCopy >= timeUntilFlicker) {
