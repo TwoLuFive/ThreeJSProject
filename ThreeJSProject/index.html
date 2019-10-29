@@ -264,7 +264,7 @@
         function update() {
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //PISTOL
-            pistol.update();
+            pistol.update(timeDelta);
             updatePistol();
             //ZOMBIES
             zombieController.update(timeDelta);

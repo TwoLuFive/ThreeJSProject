@@ -4,8 +4,9 @@ function Pistol() {
     this.mesh = null;
     this.mixer = null;
 
-    const cooldown = 0.2;
-    this.load = function(scene)  {
+    const cooldown = 0.4;
+    var cooldownRemaining = 0;
+    this.load = function (scene) {
         let loader = new THREE.GLTFLoader();
         loader.load('./models/Pistol.glb', function (gltf) {
             object.mesh = gltf.scene;
@@ -19,26 +20,45 @@ function Pistol() {
 
             scene.add(object.mesh);
 
-            object.mixer = new THREE.AnimationMixer( object.mesh );
+            object.mixer = new THREE.AnimationMixer(object.mesh);
             object.animations = gltf.animations;
-        }, undefined, function ( e ) {
-            console.error( e );
-        } );
+        }, undefined, function (e) {
+            console.error(e);
+        });
     }
-    
-    this.update = function(timeDelta) {
-        if ( object.mixer ) 
+
+    this.update = function (timeDelta) {
+        if(cooldownRemaining > 0)
         {
-            object.mixer.update(timeDelta );
+            cooldownRemaining -= timeDelta;
+        }
+        if (object.mixer) {
+            object.mixer.update(timeDelta);
         }
     }
-    this.trytoShoot = function(camera)
-    {
-        console.log(object.animations.length);
-        let directionCamera = new THREE.Vector3(0, 0, 0);
-        camera.getWorldDirection(directionCamera);
-        let target = new THREE.Vector3(camera.position.x + directionCamera.x,camera.position.y + directionCamera.y,camera.position.z + directionCamera.z )
-        camera.lookAt(new THREE.Vector3(target.x  + Math.random() *  0.005, target.y + Math.random() *  0.1, target.z  + Math.random() *  0.005));
-        object.mixer.clipAction( object.animations[0] ).play();
+    this.trytoShoot = function (camera) {
+        if (cooldownRemaining <= 0) {
+            cooldownRemaining = cooldown;
+            //ANIMATIONS
+            let animation = object.mixer.clipAction(object.animations[0]);
+            animation.setLoop(THREE.LoopOnce);
+            animation.clampWhenFinished = true;
+            animation.enable = true;
+
+            animation.play().reset();
+
+            let animation2 = object.mixer.clipAction(object.animations[1]);
+            animation2.setLoop(THREE.LoopOnce);
+            animation2.clampWhenFinished = true;
+            animation2.enable = true;
+
+            animation2.play().reset();
+
+            //RECOIL
+            let directionCamera = new THREE.Vector3(0, 0, 0);
+            camera.getWorldDirection(directionCamera);
+            let target = new THREE.Vector3(camera.position.x + directionCamera.x, camera.position.y + directionCamera.y, camera.position.z + directionCamera.z)
+            camera.lookAt(new THREE.Vector3(target.x + Math.random() * 0.005, target.y + Math.random() * 0.1, target.z + Math.random() * 0.005));
+        }
     }
 }
