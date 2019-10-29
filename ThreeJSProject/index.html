@@ -72,7 +72,6 @@
         function getCrossProduct(vector1, vector2) {
             return new THREE.Vector3(vector1.y * vector2.z - vector2.y * vector1.z, vector1.x * vector2.z - vector2.x * vector1.z, vector1.x * vector2.y - vector2.x * vector1.y);
         }
-        var zombie1 = new Zombie();
         var zombieController = new ZombieController();
 
         function init() {
@@ -171,8 +170,8 @@
                     scene.add(lights[pathIndex][lightIndex]);
                 }
             }
-            /*light = new THREE.PointLight(0xffffff, 3, 100, 1);
-            scene.add(light); */
+            light = new THREE.PointLight(0xffffff, 3, 100, 1);
+            scene.add(light); 
         }
         function setupInputs() {
             document.addEventListener('keydown',

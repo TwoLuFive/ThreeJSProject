@@ -18,8 +18,13 @@ function Zombie(startX, startZ, walkDirection) {
                 roughness: 0.1,
                 color: 0xffffff
             });
-            let modelOrientation = new THREE.Vector3(0,0,1);
-            object.mesh.rotation.y = -modelOrientation.angleTo(object.walkDirection);               
+            let modelOrientation = new THREE.Vector3(0,0,-1);
+            if(object.walkDirection.x <= 0){
+                object.mesh.rotation.y = modelOrientation.angleTo(object.walkDirection) + Math.PI;  
+            }else{
+                object.mesh.rotation.y = -modelOrientation.angleTo(object.walkDirection) + Math.PI;  
+            }
+                         
             object.mesh.position.set(object.startX, 0, object.startZ);
             scene.add(object.mesh);
 
