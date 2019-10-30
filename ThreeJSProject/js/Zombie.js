@@ -41,7 +41,11 @@ function Zombie(startX, startZ, walkDirection) {
             console.error( e );
         } );
     }
-    
+    this.die = function(timeDelta)
+    {
+        object.mixer.stopAllAction();
+        object.mixer.clipAction( object.animations[1] ).play();
+    }
     this.update = function(timeDelta) {
         if ( object.mixer ) {
             object.mixer.update(timeDelta );
