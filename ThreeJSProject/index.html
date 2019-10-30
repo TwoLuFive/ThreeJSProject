@@ -70,7 +70,7 @@
         const timeLighton = 0.75;
         const timeHitmarkerActive = 0.1;
         const chanceFlicker = 0.15;
-        const intensityMax = 1.5;
+        const intensityMax = 2.5;
         var timeUntilFlickerCopy = 0, timeHitmarkerActiveCopy = 0;
 
         function getCrossProduct(vector1, vector2) {
@@ -139,7 +139,6 @@
             });
             bulbLight.add(new THREE.Mesh(bulbGeometry, bulbMat));
             bulbLight.position.set(0, 2.5, 0);
-            bulbLight.castShadow = true;
             scene.add(bulbLight);
 
             for (let pathIndex = 0; pathIndex < 4; pathIndex++) {
@@ -156,13 +155,21 @@
                     scene.add(lights[pathIndex][lightIndex]);
                 }
             }
-            light = new THREE.PointLight(0xffffff, 3, 100, 1);
-            scene.add(light); 
+            /*light = new THREE.PointLight(0xffffff, 3, 100, 1);
+            scene.add(light); */
         }
         function setupInputs() {
             document.addEventListener('keydown',
                 function (event) {
-                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: if(pistol.trytoShoot(camera, zombieController.getZombies()) == true)  {timeHitmarkerActiveCopy = timeHitmarkerActive; } break;}
+                    switch (event.keyCode) 
+                    { 
+                        case 69: isAiming = true; break; 
+                        case 81: if(pistol.trytoShoot(camera, zombieController.getZombies()) == true)  
+                        {
+                            timeHitmarkerActiveCopy = timeHitmarkerActive; 
+                        } 
+                        break;
+                    }
                 }, false);
             document.addEventListener('keyup', function (event) {
                 switch (event.keyCode) { case 69: isAiming = false; }

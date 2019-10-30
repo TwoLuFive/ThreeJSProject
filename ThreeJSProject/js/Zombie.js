@@ -29,12 +29,6 @@ function Zombie(startX, startZ, walkDirection) {
             scene.add(object.mesh);
 
             object.mixer = new THREE.AnimationMixer( object.mesh );
-            object.mesh.traverse( function ( child ) {
-                if ( child.isMesh ) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                }
-            } );
             object.mixer.clipAction( gltf.animations[9] ).play();
             object.animations = gltf.animations;
         }, undefined, function ( e ) {
