@@ -3,6 +3,7 @@ function Pistol() {
     this.animations = [];
     this.mesh = null;
     this.mixer = null;
+    this.raycaster = null;
 
     const cooldown = 0.4;
     var cooldownRemaining = 0;
@@ -22,6 +23,8 @@ function Pistol() {
 
             object.mixer = new THREE.AnimationMixer(object.mesh);
             object.animations = gltf.animations;
+
+            object.raycaster = new THREE.Raycaster();
         }, undefined, function (e) {
             console.error(e);
         });
@@ -36,9 +39,15 @@ function Pistol() {
             object.mixer.update(timeDelta);
         }
     }
-    this.trytoShoot = function (camera) {
+    this.trytoShoot = function (camera, listofZombies) {
         if (cooldownRemaining <= 0) {
             cooldownRemaining = cooldown;
+
+            let directionCamera = new THREE.Vector3(0, 0, 0);
+            camera.getWorldDirection(directionCamera);
+            //RAYCASTING
+            object.raycaster.set(camera.position, directionCamera);
+            object.raycaster.intersectObjects(listofZombies, false);
             //ANIMATIONS
             let animation = object.mixer.clipAction(object.animations[0]);
             animation.setLoop(THREE.LoopOnce);
@@ -55,8 +64,6 @@ function Pistol() {
             animation2.play().reset();
 
             //RECOIL
-            let directionCamera = new THREE.Vector3(0, 0, 0);
-            camera.getWorldDirection(directionCamera);
             let target = new THREE.Vector3(camera.position.x + directionCamera.x, camera.position.y + directionCamera.y, camera.position.z + directionCamera.z)
             camera.lookAt(new THREE.Vector3(target.x + Math.random() * 0.005, target.y + Math.random() * 0.1, target.z + Math.random() * 0.005));
         }

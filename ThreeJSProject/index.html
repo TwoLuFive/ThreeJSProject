@@ -153,13 +153,13 @@
                     scene.add(lights[pathIndex][lightIndex]);
                 }
             }
-            light = new THREE.PointLight(0xffffff, 3, 100, 1);
-            scene.add(light); 
+            /*light = new THREE.PointLight(0xffffff, 3, 100, 1);
+            scene.add(light); */
         }
         function setupInputs() {
             document.addEventListener('keydown',
                 function (event) {
-                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: pistol.trytoShoot(camera); break;}
+                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: pistol.trytoShoot(camera, null); break;}
                 }, false);
             document.addEventListener('keyup', function (event) {
                 switch (event.keyCode) { case 69: isAiming = false; }
@@ -291,9 +291,5 @@
 
         init();
         gameLoop();
-
-
-
-
     </script>
 </body>
