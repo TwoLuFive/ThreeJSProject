@@ -40,6 +40,7 @@ function Pistol() {
         }
     }
     this.trytoShoot = function (camera, listofZombies) {
+        let returnValue = false;
         if (cooldownRemaining <= 0) {
             cooldownRemaining = cooldown;
 
@@ -53,6 +54,7 @@ function Pistol() {
                 let intersects = object.raycaster.intersectObjects(array, true);
                 if(intersects.length > 0)
                 {
+                    returnValue = true;
                     intersects[ 0].object.material.color.set( 0xff0000 );
                     listofZombies[i].die();
                 }
@@ -78,5 +80,6 @@ function Pistol() {
 
         
         }
+        return returnValue;
     }
 }
