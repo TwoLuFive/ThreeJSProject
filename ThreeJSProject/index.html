@@ -9,7 +9,7 @@
             overflow: hidden;
         }
 
-        #imgCrosshair {
+        img {
             position: absolute;
             display: block;
             top: 50%;
@@ -39,6 +39,7 @@
 
 <body>
     <img id="imgCrosshair" ; src="img/Crosshair.png">
+    <img id="imgHitmarker" ; src="img/Hitmarker.png">
     <canvas id="myCanvas">
     </canvas>
 
@@ -55,6 +56,7 @@
             camera,
             lights,
             crosshairImg = document.getElementById('imgCrosshair'), 
+            hitmarkerImg = document.getElementById('imgHitmarker'), 
             isFlickering,
             timeFlickerPassed,
             timesLighton,
@@ -66,9 +68,10 @@
         const timeUntilFlicker = 0.7;
         const timeFlicker = 0.6;
         const timeLighton = 0.75;
+        const timeHitmarkerActive = 0.1;
         const chanceFlicker = 0.15;
         const intensityMax = 1.5;
-        var timeUntilFlickerCopy = 0;
+        var timeUntilFlickerCopy = 0, timeHitmarkerActiveCopy = 0;
 
         function getCrossProduct(vector1, vector2) {
             return new THREE.Vector3(vector1.y * vector2.z - vector2.y * vector1.z, vector1.x * vector2.z - vector2.x * vector1.z, vector1.x * vector2.y - vector2.x * vector1.y);
@@ -153,13 +156,13 @@
                     scene.add(lights[pathIndex][lightIndex]);
                 }
             }
-            /*light = new THREE.PointLight(0xffffff, 3, 100, 1);
-            scene.add(light); */
+            light = new THREE.PointLight(0xffffff, 3, 100, 1);
+            scene.add(light); 
         }
         function setupInputs() {
             document.addEventListener('keydown',
                 function (event) {
-                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: pistol.trytoShoot(camera, null); break;}
+                    switch (event.keyCode) { case 69: isAiming = true; break; case 81: if(pistol.trytoShoot(camera, zombieController.getZombies()) == true)  {timeHitmarkerActiveCopy = timeHitmarkerActive; } break;}
                 }, false);
             document.addEventListener('keyup', function (event) {
                 switch (event.keyCode) { case 69: isAiming = false; }
@@ -183,12 +186,12 @@
             spawnPoints[2] = new THREE.Vector3(0, 0, 0);
             spawnPoints[3] = new THREE.Vector3(0, 0, 0);
 
-            setupInputs();
             setupMap(scene);
             setupLights(scene);
             pistol = new Pistol();
             pistol.load(scene);
             zombieController.load(scene);
+            setupInputs();
         }
 
         function gameLoop() {
@@ -262,6 +265,15 @@
             }
         }
         function update() {
+            if(timeHitmarkerActiveCopy > 0)
+            {
+                hitmarkerImg.style.visibility = 'visible';
+                timeHitmarkerActiveCopy -= timeDelta;
+            }
+            else
+            {
+            hitmarkerImg.style.visibility = 'hidden';
+            }
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //PISTOL
             pistol.update(timeDelta);

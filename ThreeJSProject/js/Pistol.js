@@ -43,11 +43,22 @@ function Pistol() {
         if (cooldownRemaining <= 0) {
             cooldownRemaining = cooldown;
 
+            
+            let listofMeshes = new Array(listofZombies.length);
+            for(let i = 0; i < listofMeshes.length; i++)
+            {
+                listofMeshes[i] = listofZombies[i].mesh;
+            }
             let directionCamera = new THREE.Vector3(0, 0, 0);
             camera.getWorldDirection(directionCamera);
             //RAYCASTING
             object.raycaster.set(camera.position, directionCamera);
-            object.raycaster.intersectObjects(listofZombies, false);
+            let intersects = object.raycaster.intersectObjects(listofMeshes, true);
+            console.log(intersects.length);
+            for(let i = 0; i < intersects.length; i++)
+            {
+                intersects[ i ].object.material.color.set( 0xff0000 );
+            }
             //ANIMATIONS
             let animation = object.mixer.clipAction(object.animations[0]);
             animation.setLoop(THREE.LoopOnce);
@@ -65,7 +76,9 @@ function Pistol() {
 
             //RECOIL
             let target = new THREE.Vector3(camera.position.x + directionCamera.x, camera.position.y + directionCamera.y, camera.position.z + directionCamera.z)
-            camera.lookAt(new THREE.Vector3(target.x + Math.random() * 0.005, target.y + Math.random() * 0.1, target.z + Math.random() * 0.005));
+            camera.lookAt(new THREE.Vector3(target.x + Math.random() * 0.005, target.y + Math.random() * 0.3, target.z + Math.random() * 0.005));
+
+            return intersects.length > 0;
         }
     }
 }

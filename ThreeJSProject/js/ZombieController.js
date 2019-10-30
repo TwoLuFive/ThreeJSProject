@@ -34,7 +34,10 @@ function ZombieController() {
             z.update(timeDelta);
         });
     }
-
+    this.getZombies = function()
+    {
+        return object.zombies;
+    }
     
     function doesZombieHitPlayer(player)
     {
