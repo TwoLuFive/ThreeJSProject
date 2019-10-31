@@ -9,7 +9,7 @@
             overflow: hidden;
         }
 
-        img {
+        img.aimUI {
             position: absolute;
             display: block;
             top: 50%;
@@ -23,6 +23,24 @@
         #myCanvas {
             width: 100%;
             height: 100%
+        }
+
+        #bulletsInChamber {
+            position: absolute;
+            font-family: monospace;
+            right: 120px;
+            bottom: 40px;
+            font-size: 80px;
+            color: white;
+        }
+
+        #bulletsStored {
+            position: absolute;
+            font-family: monospace;
+            right: 100px;
+            bottom: 20px;
+            font-size: 60px;
+            color: white;
         }
     </style>
 
@@ -38,8 +56,10 @@
 </head>
 
 <body>
-    <img id="imgCrosshair" ; src="img/Crosshair.png">
-    <img id="imgHitmarker" ; src="img/Hitmarker.png">
+    <img id="imgCrosshair" ; class="aimUI" ; src="img/Crosshair.png">
+    <img id="imgHitmarker" ; class="aimUI" ; src="img/Hitmarker.png">
+    <div id="bulletsInChamber"> 0/</div>
+    <div id="bulletsStored"> 0 </div>
     <canvas id="myCanvas">
     </canvas>
 
@@ -55,8 +75,10 @@
             scene,
             camera,
             lights,
-            crosshairImg = document.getElementById('imgCrosshair'), 
-            hitmarkerImg = document.getElementById('imgHitmarker'), 
+            crosshairImg = document.getElementById('imgCrosshair'),
+            hitmarkerImg = document.getElementById('imgHitmarker'),
+            bulletsInChamberText = document.getElementById('bulletsInChamber'),
+            bulletsStoredText = document.getElementById('bulletsStored'),
             isFlickering,
             timeFlickerPassed,
             timesLighton,
@@ -161,14 +183,13 @@
         function setupInputs() {
             document.addEventListener('keydown',
                 function (event) {
-                    switch (event.keyCode) 
-                    { 
-                        case 69: isAiming = true; break; 
-                        case 81: if(pistol.trytoShoot(camera, zombieController.getZombies()) == true)  
-                        {
-                            timeHitmarkerActiveCopy = timeHitmarkerActive; 
-                        } 
-                        break;
+                    switch (event.keyCode) {
+                        case 69: isAiming = true; break;
+                        case 81: if (pistol.trytoShoot(camera, zombieController.getZombies()) == true) {
+                            timeHitmarkerActiveCopy = timeHitmarkerActive;
+                        }
+                            break;
+                        case 82: pistol.trytoReload(); break;
                     }
                 }, false);
             document.addEventListener('keyup', function (event) {
@@ -211,40 +232,55 @@
             render();
         }
         function updatePistol() {
+
+            bulletsInChamberText.textContent = pistol.bulletsInChamber.toString() + '/';
+            bulletsStoredText.textContent = pistol.bulletsStored;
+
             let directionCamera = new THREE.Vector3(0, 0, 0);
             var axis = new THREE.Vector3(0, 1, 0);
             camera.getWorldDirection(directionCamera);
 
+            pistol.mesh.position.set(
+                camera.position.x + directionCamera.x,
+                camera.position.y + directionCamera.y - 0.3,
+                camera.position.z + directionCamera.z,
+            );
 
-            if (isAiming == true) {
-                pistol.mesh.position.set(
-                    camera.position.x + directionCamera.x,
-                    camera.position.y + directionCamera.y - 0.2,
-                    camera.position.z + directionCamera.z,
-                );
-                pistol.mesh.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
-                pistol.mesh.rotateY(90 / 180 * Math.PI);
+            let vectorSide = getCrossProduct(axis, directionCamera);
+            vectorSide = vectorSide.normalize();
+            pistol.mesh.position.set(
+                pistol.mesh.position.x - vectorSide.x * 0.2,
+                pistol.mesh.position.y - vectorSide.y * 0.2,
+                pistol.mesh.position.z - vectorSide.z * 0.2
+            );
+            pistol.mesh.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+            pistol.mesh.rotateY(95 / 180 * Math.PI);
 
-                crosshairImg.style.visibility = 'hidden';
+            crosshairImg.style.visibility = 'visible';
+
+            if (pistol.reloadTimeRemaining > 0) {
+                if (pistol.reloadTimeRemaining > 0.5 * pistol.timetoReload) {
+                    pistol.mesh.position.y -= 1 * (pistol.timetoReload - pistol.reloadTimeRemaining);
+
+                }
+                else {
+                    pistol.mesh.position.y -= 1 * (pistol.reloadTimeRemaining);
+                }
             }
             else {
-                pistol.mesh.position.set(
-                    camera.position.x + directionCamera.x,
-                    camera.position.y + directionCamera.y - 0.3,
-                    camera.position.z + directionCamera.z,
-                );
+                if (isAiming == true) {
+                    pistol.mesh.position.set(
+                        camera.position.x + directionCamera.x,
+                        camera.position.y + directionCamera.y - 0.2,
+                        camera.position.z + directionCamera.z,
+                    );
+                    pistol.mesh.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+                    pistol.mesh.rotateY(90 / 180 * Math.PI);
 
-                let vectorSide = getCrossProduct(axis, directionCamera);
-                vectorSide = vectorSide.normalize();
-                pistol.mesh.position.set(
-                    pistol.mesh.position.x - vectorSide.x * 0.2,
-                    pistol.mesh.position.y - vectorSide.y * 0.2,
-                    pistol.mesh.position.z - vectorSide.z * 0.2
-                );
-                pistol.mesh.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
-                pistol.mesh.rotateY(95 / 180 * Math.PI);
-
-                crosshairImg.style.visibility = 'visible';
+                    crosshairImg.style.visibility = 'hidden';
+                }
+                else {
+                }
             }
         }
         function trytoFlicker(pathIndex, lightIndex) {
@@ -272,14 +308,12 @@
             }
         }
         function update() {
-            if(timeHitmarkerActiveCopy > 0)
-            {
+            if (timeHitmarkerActiveCopy > 0) {
                 hitmarkerImg.style.visibility = 'visible';
                 timeHitmarkerActiveCopy -= timeDelta;
             }
-            else
-            {
-            hitmarkerImg.style.visibility = 'hidden';
+            else {
+                hitmarkerImg.style.visibility = 'hidden';
             }
             bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
             //PISTOL
