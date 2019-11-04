@@ -79,6 +79,7 @@
             hitmarkerImg = document.getElementById('imgHitmarker'),
             bulletsInChamberText = document.getElementById('bulletsInChamber'),
             bulletsStoredText = document.getElementById('bulletsStored'),
+            sfxElectricity = new Audio('sounds/sfx_electricity.mp3'),
             isFlickering,
             timeFlickerPassed,
             timesLighton,
@@ -87,13 +88,14 @@
             isAiming,
             myCanvas = document.getElementById('myCanvas');
         var timeFixed = 0;
-        const timeUntilFlicker = 0.7;
+        const timeUntilEventOccuring = 0.7;
         const timeFlicker = 0.6;
         const timeLighton = 0.75;
         const timeHitmarkerActive = 0.1;
         const chanceFlicker = 0.15;
         const intensityMax = 2.5;
-        var timeUntilFlickerCopy = 0, timeHitmarkerActiveCopy = 0;
+        const chanceSfxElectricity = 0.1;
+        var timeUntilEventOccuringCopy = 0, timeHitmarkerActiveCopy = 0;
 
         function getCrossProduct(vector1, vector2) {
             return new THREE.Vector3(vector1.y * vector2.z - vector2.y * vector1.z, vector1.x * vector2.z - vector2.x * vector1.z, vector1.x * vector2.y - vector2.x * vector1.y);
@@ -321,14 +323,21 @@
             updatePistol();
             //ZOMBIES
             zombieController.update(timeDelta);
-            //LIGHT
-            timeUntilFlickerCopy += timeDelta;
-            if (timeUntilFlickerCopy >= timeUntilFlicker) {
-                timeUntilFlickerCopy = 0;
+            //EVENTS
+            timeUntilEventOccuringCopy += timeDelta;
+            if (timeUntilEventOccuringCopy >= timeUntilEventOccuring) {
+                timeUntilEventOccuringCopy = 0;
+                //LIGHTS
                 for (let i = 0; i < lights.length * lights[0].length; i++) {
                     if (Math.random() <= chanceFlicker) {
                         isFlickering[i] = true;
                     }
+                }
+
+                //SOUNDS
+                if(Math.random() <= chanceSfxElectricity)
+                {
+                    sfxElectricity.play();
                 }
             }
             for (let pathIndex = 0; pathIndex < 4; pathIndex++) {

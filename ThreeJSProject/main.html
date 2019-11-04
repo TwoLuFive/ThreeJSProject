@@ -27,9 +27,6 @@
                 camera.updateProjectionMatrix();
             }
             );
-            var geometry = new THREE.IcosahedronGeometry(1, 5);
-            var icosahedron = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: 0xffffff, wireframe: true}));
-            scene.add(icosahedron);
 
             var light = new THREE.PointLight(0x0ff0ff,1);
             light.position.set(1,0,1);
@@ -53,16 +50,23 @@
             var timeFixed = 0;
             var clock = new THREE.Clock();
             scene.background = new THREE.Color( 0x111111 );
+
+            
+            var cube;
+            var start = function()
+            {
+                var geometry = new THREE.CubeGeometry(1);
+                cube = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: 0xffffff, wireframe: true}));
+                scene.add(cube);
+            };
             var update = function()
             {
                 timeFixed += clock.getDelta();
 
-                icosahedron.rotation.x += 0.01;
-                icosahedron.rotation.y += 0.03;
-                icosahedron.rotation.z -= 0.02;
-                icosahedron.position.y = 3*Math.sin(timeFixed);
-
-                
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.03;
+                cube.rotation.z -= 0.02;
+                cube.position.y = 3*Math.sin(timeFixed);
             };
             //Draws the scene using the camera.
             var render = function()
@@ -77,7 +81,7 @@
                 update();
                 render();
             };
-
+            start();
             loopGame();
         </script>
     </body>
