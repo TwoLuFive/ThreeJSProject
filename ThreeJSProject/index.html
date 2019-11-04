@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>threejs - models</title>
+    <title>Ultimate Zombie Slasher 2</title>
 
     <style>
         body {
@@ -93,7 +93,7 @@
         const timeLighton = 0.75;
         const timeHitmarkerActive = 0.1;
         const chanceFlicker = 0.15;
-        const intensityMax = 2.5;
+        const intensityMax = 4;
         const chanceSfxElectricity = 0.1;
         var timeUntilEventOccuringCopy = 0, timeHitmarkerActiveCopy = 0;
 
@@ -317,7 +317,7 @@
             else {
                 hitmarkerImg.style.visibility = 'hidden';
             }
-            bulbLight.intensity = 2 * Math.sin(timeFixed) + 3;
+            bulbLight.intensity = intensityMax * Math.sin(timeFixed) + (intensityMax * 1.2);
             //PISTOL
             pistol.update(timeDelta);
             updatePistol();
